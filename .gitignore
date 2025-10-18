@@ -21,4 +21,6 @@ profile.cov
 # vendor/r/IDE
  .idea/
  .claudesync
+ IP2LOCATION-LITE-DB11.CSV
+ data/IP2LOCATION-LITE-DB11.CSV
 # .vscode/

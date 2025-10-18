@@ -1,0 +1,403 @@
+# IP Location API
+
+**High-performance REST API for IP geolocation** - Lightning-fast IP address lookup service using binary search over 2.9M+ location records.
+
+## 📋 Description
+
+Backend challenge implementation that resolves IPv4 addresses to geographic locations using the IP2Location dataset. Built with Go for maximum performance, handling 1,800+ requests/second with sub-millisecond latency.
+
+## 🚀 Demo
+
+- **API Endpoint**: `http://localhost:8080`
+- **Health Check**: `http://localhost:8080/health`
+- **Swagger Documentation**: `http://localhost:8080/swagger/index.html`
+
+## ✨ Features
+
+- ✅ **Ultra-fast lookups** - Binary search on 2.9M+ records
+- ✅ **Sub-millisecond response time** - p95 latency: 0.37ms
+- ✅ **High throughput** - 1,833 requests/second
+- ✅ **Concurrent load** - Handles 1,000+ simultaneous users
+- ✅ **RESTful API** with JSON responses
+- ✅ **Swagger/OpenAPI documentation**
+- ✅ **Health check endpoint** for monitoring
+- ✅ **Docker ready** with multi-stage build
+- ✅ **Production-ready** with comprehensive tests
+- ✅ **Zero external dependencies** (except Swagger)
+
+## 🛠️ Technologies
+
+**Backend:**
+- Go 1.24
+- Standard library (net/http)
+- Swagger/OpenAPI (github.com/swaggo/http-swagger)
+- Docker & Docker Compose
+
+**Testing:**
+- Go testing framework
+- K6 for load testing
+- golangci-lint for code quality
+
+## 📋 Prerequisites
+
+- Go 1.24 or higher
+- Docker and Docker Compose (optional)
+- K6 for performance testing (optional)
+- golangci-lint for linting (optional)
+
+### Tool Installation
+
+#### Go
+```bash
+# MacOS
+brew install go
+
+# Ubuntu/Debian
+sudo apt install golang-1.24
+```
+
+#### Docker
+```bash
+# MacOS
+brew install --cask docker
+
+# Ubuntu
+sudo apt install docker.io docker-compose
+```
+
+#### K6 (Performance Testing)
+```bash
+# MacOS
+brew install k6
+
+# Ubuntu/Debian
+sudo gpg -k
+sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+sudo apt-get update
+sudo apt-get install k6
+
+```
+
+#### golangci-lint (Code Linting)
+```bash
+# MacOS
+brew install golangci-lint
+
+# Ubuntu/Debian
+curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+
+# Go install
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+```
+
+#### Swag (Swagger Documentation)
+```bash
+go install github.com/swaggo/swag/cmd/swag@latest
+```
+
+## 🚀 Quick Start
+
+### 📦 Option 1: Run with Docker (Recommended)
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/moura95/arena-backend-challenge
+cd arena-backend-challenge
+
+# 2. Build and run with docker-compose
+make docker-run
+
+# The API will be available at:
+# - API: http://localhost:8080
+# - Health: http://localhost:8080/health
+# - Swagger: http://localhost:8080/swagger/index.html
+```
+
+### 🔧 Option 2: Run Locally
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/moura95/arena-backend-challenge
+cd arena-backend-challenge
+
+# 2. Download dependencies
+go mod download
+
+# 3. Generate Swagger documentation
+make swagger
+
+# 4. Run the server
+make run
+
+# Or build and run the binary
+make build
+./bin/server
+```
+
+The API will be available at `http://localhost:8080`
+
+## 🧪 Testing
+
+### Unit Tests
+```bash
+# Run all tests with coverage
+make test
+
+# Output:
+# Running tests...
+# go test -v -race -coverprofile=coverage.out ./...
+# === RUN   TestIPToID
+# --- PASS: TestIPToID (0.00s)
+# === RUN   TestMemoryRepository_FindByIPID
+# --- PASS: TestMemoryRepository_FindByIPID (0.01s)
+# ...
+# PASS
+# coverage: 85.2% of statements
+```
+
+### Performance Tests (K6)
+```bash
+# Start the server first
+make run
+
+# In another terminal, run K6 tests
+make test-performance
+```
+
+**K6 Results:**
+```
+✓ p(95)<100ms - 95% of requests under 100ms
+  
+Checks:
+  ✓ status is correct........: 96.95% (220,201 passed)
+  ✓ response time < 100ms....: 100%
+  ✓ content-type is JSON.....: 100%
+
+Performance:
+  http_req_duration..........: avg=238µs  p(95)=370µs  max=55ms
+  http_reqs..................: 257,092 (1,833 req/s)
+  vus........................: 1,000 concurrent users
+  iteration_duration.........: avg=200ms
+  
+Network:
+  data_received..............: 48 MB (342 kB/s)
+  data_sent..................: 24 MB (171 kB/s)
+```
+
+### Code Linting
+```bash
+# Run linter
+make lint
+
+# Run linter with auto-fix
+make lint-fix
+```
+
+## 📚 API Endpoints
+
+### 🌍 IP Location Lookup
+```http
+GET /ip/location?ip={ipv4_address}
+```
+
+**Query Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `ip` | string | Yes | IPv4 address in dotted decimal notation (e.g., "8.8.8.8") |
+
+**Success Response (200 OK):**
+```json
+{
+  "country": "United States",
+  "countryCode": "US",
+  "region": "California",
+  "city": "Mountain View"
+}
+```
+
+**Error Responses:**
+
+*400 Bad Request - Invalid IP format:*
+```json
+{
+  "error": "invalid IP address: invalid octet 1: strconv.ParseUint: parsing \"256\": value out of range"
+}
+```
+
+*404 Not Found - IP not in database:*
+```json
+{
+  "error": "Location not found for the given IP"
+}
+```
+
+### ❤️ Health Check
+```http
+GET /health
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-10-18T14:30:45.123456Z",
+}
+```
+
+### 📖 Swagger Documentation
+```http
+GET /swagger/index.html
+```
+
+Interactive API documentation with request/response examples and the ability to test endpoints directly from the browser.
+
+## 💡 Usage Examples
+
+### cURL Examples
+
+**Get location for Google DNS (8.8.8.8):**
+```bash
+curl "http://localhost:8080/ip/location?ip=8.8.8.8"
+```
+
+**Get location for Cloudflare DNS (1.1.1.1):**
+```bash
+curl "http://localhost:8080/ip/location?ip=1.1.1.1"
+```
+
+**Health check:**
+```bash
+curl "http://localhost:8080/health"
+```
+
+## 🏗️ Architecture
+
+The project follows **Clean Architecture** principles with clear separation of concerns:
+
+```
+arena-backend-challenge/
+├── cmd/
+│   └── main.go                 # Application entry point
+│
+├── internal/
+│   ├── handler/               # HTTP handlers (presentation layer)
+│   │   ├── location_handler.go
+│   │   └── location_handler_test.go
+│   │
+│   ├── service/               # Business logic
+│   │   ├── location_service.go
+│   │   └── location_service_test.go
+│   │
+│   ├── repository/            # Data access layer
+│   │   ├── memory.go          # In-memory repository with binary search
+│   │   ├── memory_test.go
+│   │   └── mock_repository.go # Mock for testing
+│   │
+│   ├── domain/                # Domain entities and interfaces
+│   │   └── location.go
+│   │
+│   └── server.go              # HTTP server setup and routing
+│
+├── api/v1/                    # API contracts (DTOs)
+│   ├── location.go            # Location response
+│   ├── health.go              # Health response
+│   └── v1.go                  # Error response
+│
+├── pkg/
+│   └── iputil/                # Utility packages
+│       ├── converter.go       # IP to numeric ID conversion
+│       └── converter_test.go
+│
+├── config/                    # Configuration management
+│   ├── config.go
+│   └── dotenv.go              # .env file parser
+│
+├── data/
+│   └── IP2LOCATION-LITE-DB11.CSV  # IP geolocation dataset (2.9M+ records)
+│
+├── docs/                      # Generated Swagger documentation
+│   ├── docs.go
+│   ├── swagger.json
+│   └── swagger.yaml
+│
+├── Dockerfile                 # Multi-stage Docker build
+├── docker-compose.yml         # Docker Compose configuration
+├── Makefile                   # Build automation
+├── go.mod                     # Go dependencies
+└── test-k6.js                # K6 performance tests
+```
+
+### Layer Responsibilities
+
+**Handler Layer** (`internal/handler/`)
+- HTTP request/response handling
+- Input validation
+- Error formatting
+- No business logic
+
+**Service Layer** (`internal/service/`)
+- Business logic orchestration
+- IP validation and conversion
+- Coordinates repository calls
+
+**Repository Layer** (`internal/repository/`)
+- Data access abstraction
+- Binary search implementation
+- CSV loading and parsing
+
+**Domain Layer** (`internal/domain/`)
+- Core business entities
+- Repository interfaces
+- Domain errors
+
+## 🧠 Technical Decisions
+
+### 1. **In-Memory Storage with Binary Search**
+
+**Why:**
+- Dataset is static (2.9M records, 330MB CSV)
+- Fits comfortably in RAM (~400MB loaded)
+- Binary search provides O(log n) lookup time
+- Eliminates database overhead and network latency
+
+**Trade-offs:**
+- ✅ **Pros:**
+    - Ultra-fast lookups (< 1ms)
+    - Simple deployment (no database needed)
+    - High throughput (1,800+ req/s)
+    - No database maintenance
+
+- ❌ **Cons:**
+    - Requires server restart to update data
+    - Memory usage: ~400MB per instance
+    - Not suitable if dataset updates frequently
+
+**Alternative considered:** PostgreSQL with indexed ranges
+- Would add ~10-50ms latency per query
+- Requires database management
+- Better for frequently updated data
+- Chosen approach is optimal for this static dataset use case
+
+### 2. **Standard Library HTTP Server**
+
+**Why:**
+- Challenge requirement: minimize third-party dependencies
+- Standard library is production-ready and well-tested
+- Sufficient for simple REST API
+
+**Trade-offs:**
+- ✅ **Pros:**
+    - Zero dependencies (except Swagger)
+    - Lightweight and fast
+    - Well-documented
+
+- ❌ **Cons:**
+    - More verbose routing
+    - No built-in middleware chain
+    - Manual request parsing
+
+**Alternative considered:** Gin/Echo frameworks
+- Would provide cleaner routing syntax
+- Built-in middleware and validation
+- Not used to respect challenge constraints

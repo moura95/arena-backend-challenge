@@ -54,7 +54,11 @@ func TestNewMemoryRepository(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to create temp CSV: %v", err)
 			}
-			defer os.Remove(tmpFile)
+			defer func() {
+				if err := os.Remove(tmpFile); err != nil {
+					t.Logf("Warning: failed to remove temp file: %v", err)
+				}
+			}()
 
 			// Create repository
 			repo, err := NewMemoryRepository(tmpFile)
@@ -87,7 +91,11 @@ func TestMemoryRepository_FindByIPID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp CSV: %v", err)
 	}
-	defer os.Remove(tmpFile)
+	defer func() {
+		if err := os.Remove(tmpFile); err != nil {
+			t.Logf("Warning: failed to remove temp file: %v", err)
+		}
+	}()
 
 	repo, err := NewMemoryRepository(tmpFile)
 	if err != nil {
@@ -212,7 +220,11 @@ func BenchmarkMemoryRepository_FindByIPID(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Failed to create temp CSV: %v", err)
 	}
-	defer os.Remove(tmpFile)
+	defer func() {
+		if err := os.Remove(tmpFile); err != nil {
+			b.Logf("Warning: failed to remove temp file: %v", err)
+		}
+	}()
 
 	repo, err := NewMemoryRepository(tmpFile)
 	if err != nil {

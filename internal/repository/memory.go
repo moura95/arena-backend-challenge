@@ -86,8 +86,8 @@ func loadCSV(csvPath string) ([]domain.Location, error) {
 		location := domain.Location{
 			LowerIPID:   uint32(lowerIPID),
 			UpperIPID:   uint32(upperIPID),
-			Country:     record[2],
-			CountryCode: record[3],
+			CountryCode: record[2],
+			Country:     record[3],
 			Region:      record[4],
 			City:        record[5],
 		}

@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 
 	v1 "arena-backend-challenge/api/v1"
@@ -50,7 +51,10 @@ func (h *LocationHandler) GetLocation(w http.ResponseWriter, r *http.Request) {
 func (h *LocationHandler) sendJSON(w http.ResponseWriter, data interface{}, statusCode int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(data)
+
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		log.Printf("Error encoding JSON response: %v", err)
+	}
 }
 
 func (h *LocationHandler) sendError(w http.ResponseWriter, message string, statusCode int) {

@@ -39,7 +39,7 @@ WORKDIR /app
 COPY --from=builder /app/server .
 
 # Copy CSV data file
-COPY data/IP2LOCATION-LITE-DB11.CSV ./data/
+COPY data/sample.csv ./data/
 
 # Copy .env file (optional, can use ENV vars instead)
 COPY .env .

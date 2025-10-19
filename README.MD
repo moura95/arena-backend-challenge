@@ -62,8 +62,9 @@ The project includes a **sample CSV file** (`data/sample.csv`) with 20 IP ranges
 
 **For full dataset with 2.9M+ records:**
 
-1Extract and place `IP2LOCATION-LITE-DB11.CSV` in the `data/` directory
-2Update `.env`:
+1 - Paste file `IP2LOCATION-LITE-DB11.CSV` in the `data/` directory
+
+2 - Update `.env`:
 ```bash
    CSV_FILE_PATH=data/IP2LOCATION-LITE-DB11.CSV
 ```

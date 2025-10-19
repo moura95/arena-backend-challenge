@@ -1,4 +1,4 @@
-o# IP Location API
+# IP Location API
 
 **High-performance REST API for IP geolocation** - Lightning-fast IP address lookup service using binary search over 2.9M+ location records.
 

@@ -8,10 +8,12 @@ import (
 
 	v1 "arena-backend-challenge/api/v1"
 	"arena-backend-challenge/config"
+	_ "arena-backend-challenge/docs"
 	"arena-backend-challenge/internal/handler"
 	"arena-backend-challenge/internal/repository"
 	"arena-backend-challenge/internal/service"
 	"arena-backend-challenge/pkg/logger"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 const Version = "1.0.0"
@@ -51,11 +53,23 @@ func (s *Server) registerRoutes() {
 	http.HandleFunc("/ip/location", s.locationHandler.GetLocation)
 	http.HandleFunc("/health", s.handleHealth)
 
+	// Serve swagger files from docs directory
+	http.HandleFunc("/swagger/", httpSwagger.WrapHandler)
+
 	logger.Info("Routes registered:")
 	logger.Info("  GET /ip/location?ip=<address>")
 	logger.Info("  GET /health")
+	logger.Info("  GET /swagger/swagger.json")
+	logger.Info("  GET /docs (redirects to Swagger)")
 }
 
+// handleHealth godoc
+// @Summary Health check
+// @Description Returns the health status of the API
+// @Tags Health
+// @Produce json
+// @Success 200 {object} v1.HealthResponse "Service is healthy"
+// @Router /health [get]
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	response := v1.HealthResponse{
 		Status:    "healthy",

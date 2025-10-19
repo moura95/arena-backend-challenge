@@ -22,6 +22,17 @@ func NewLocationHandler(service *service.LocationService) *LocationHandler {
 	}
 }
 
+// GetLocation godoc
+// @Summary Get IP location
+// @Description Get geographic location information for a given IP address
+// @Tags Location
+// @Accept json
+// @Produce json
+// @Param ip query string true "IPv4 address (e.g., 8.8.8.8)"
+// @Success 200 {object} v1.LocationResponse "Location found"
+// @Failure 400 {object} v1.ErrorResponse "Invalid IP address format"
+// @Failure 404 {object} v1.ErrorResponse "Location not found for the given IP"
+// @Router /ip/location [get]
 func (h *LocationHandler) GetLocation(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 

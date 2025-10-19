@@ -1,0 +1,83 @@
+basePath: /
+definitions:
+  v1.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  v1.HealthResponse:
+    properties:
+      status:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  v1.LocationResponse:
+    properties:
+      city:
+        type: string
+      country:
+        type: string
+      countryCode:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: REST API that resolves IP addresses to geographic locations using IP2Location
+    dataset
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: IP Location API
+  version: 1.0.0
+paths:
+  /health:
+    get:
+      description: Returns the health status of the API
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service is healthy
+          schema:
+            $ref: '#/definitions/v1.HealthResponse'
+      summary: Health check
+      tags:
+      - Health
+  /ip/location:
+    get:
+      consumes:
+      - application/json
+      description: Get geographic location information for a given IP address
+      parameters:
+      - description: IPv4 address (e.g., 8.8.8.8)
+        in: query
+        name: ip
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Location found
+          schema:
+            $ref: '#/definitions/v1.LocationResponse'
+        "400":
+          description: Invalid IP address format
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Location not found for the given IP
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Get IP location
+      tags:
+      - Location
+schemes:
+- http
+- https
+swagger: "2.0"

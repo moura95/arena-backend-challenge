@@ -1,5 +1,9 @@
 # IP Location API
 
+[![CI](https://github.com/moura95/arena-backend-challenge/workflows/CI/badge.svg)](https://github.com/moura95/arena-backend-challenge/actions)
+[![Go Version](https://img.shields.io/badge/Go-1.24-blue.svg)](https://golang.org)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 **High-performance REST API for IP geolocation** - Lightning-fast IP address lookup service using binary search over 2.9M+ location records.
 
 ## 📋 Description
@@ -251,7 +255,7 @@ GET /health
 ```json
 {
   "status": "healthy",
-  "timestamp": "2025-10-18T14:30:45.123456Z",
+  "timestamp": "2025-10-18T14:30:45.123456Z"
 }
 ```
 

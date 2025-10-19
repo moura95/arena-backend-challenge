@@ -11,7 +11,7 @@ func IPToID(ip string) (uint32, error) {
 
 	parts := strings.Split(ip, ".")
 	if len(parts) != 4 {
-		return 0, fmt.Errorf("invalid IP format: expected 4 octets, got %d", len(parts))
+		return 0, fmt.Errorf("invalid IP format '%s': expected 4 octets, got %d", ip, len(parts))
 	}
 
 	var octets [4]uint32
@@ -19,7 +19,7 @@ func IPToID(ip string) (uint32, error) {
 	for i, part := range parts {
 		num, err := strconv.ParseUint(part, 10, 32)
 		if err != nil {
-			return 0, fmt.Errorf("invalid octet %d: %w", i+1, err)
+			return 0, fmt.Errorf("parse octet %d ('%s'): %w", i+1, part, err)
 		}
 
 		if num > 255 {

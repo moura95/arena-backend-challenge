@@ -20,12 +20,12 @@ func NewLocationService(repo domain.Repository) *LocationService {
 func (s *LocationService) GetLocationByIP(ip string) (*domain.Location, error) {
 	ipID, err := iputil.IPToID(ip)
 	if err != nil {
-		return nil, fmt.Errorf("invalid IP address: %w", err)
+		return nil, fmt.Errorf("convert IP to ID: %w", err)
 	}
 
 	location, err := s.repo.FindByIPID(ipID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("find location by IP ID: %w", err)
 	}
 
 	return location, nil

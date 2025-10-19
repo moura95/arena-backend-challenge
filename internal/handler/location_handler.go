@@ -34,13 +34,19 @@ func (h *LocationHandler) GetLocation(w http.ResponseWriter, r *http.Request) {
 
 	location, err := h.service.GetLocationByIP(ip)
 	if err != nil {
+		duration := time.Since(start)
+
 		if errors.Is(err, domain.ErrLocationNotFound) {
 			h.sendError(w, "Location not found for the given IP", http.StatusNotFound)
-			logger.Infof("IP lookup - IP: %s - Status: 404 Not Found - Duration: %v", ip, time.Since(start))
+			logger.Infof("IP lookup not found - IP: %s - Status: 404 - Duration: %v - Error chain: %v",
+				ip, duration, err)
 			return
 		}
+
 		h.sendError(w, err.Error(), http.StatusBadRequest)
-		logger.Warningf("Invalid IP - IP: %s - Error: %v - Duration: %v", ip, err, time.Since(start))
+
+		logger.Warningf("IP lookup failed - IP: %s - Status: 400 - Duration: %v - Error chain: %v",
+			ip, duration, err)
 		return
 	}
 
@@ -52,8 +58,10 @@ func (h *LocationHandler) GetLocation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.sendJSON(w, response, http.StatusOK)
-	logger.Infof("IP lookup - IP: %s - Country: %s - City: %s - Status: 200 OK - Duration: %v",
-		ip, location.Country, location.City, time.Since(start))
+
+	duration := time.Since(start)
+	logger.Infof("IP lookup success - IP: %s - Country: %s - City: %s - Status: 200 - Duration: %v",
+		ip, location.Country, location.City, duration)
 }
 
 func (h *LocationHandler) sendJSON(w http.ResponseWriter, data interface{}, statusCode int) {

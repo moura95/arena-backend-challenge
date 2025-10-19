@@ -17,7 +17,7 @@ type MemoryRepository struct {
 func NewMemoryRepository(csvPath string) (*MemoryRepository, error) {
 	locations, err := loadCSV(csvPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load CSV: %w", err)
+		return nil, fmt.Errorf("load CSV: %w", err)
 	}
 
 	sort.Slice(locations, func(i, j int) bool {
@@ -38,13 +38,13 @@ func (r *MemoryRepository) FindByIPID(ipID uint32) (*domain.Location, error) {
 		return &r.locations[idx], nil
 	}
 
-	return nil, domain.ErrLocationNotFound
+	return nil, fmt.Errorf("search IP ID %d: %w", ipID, domain.ErrLocationNotFound)
 }
 
 func loadCSV(csvPath string) ([]domain.Location, error) {
 	file, err := os.Open(csvPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("open file %s: %w", csvPath, err)
 	}
 	defer func() {
 		if closeErr := file.Close(); closeErr != nil {
@@ -55,7 +55,7 @@ func loadCSV(csvPath string) ([]domain.Location, error) {
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read CSV: %w", err)
 	}
 
 	if len(records) == 0 {

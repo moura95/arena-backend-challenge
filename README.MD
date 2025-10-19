@@ -76,7 +76,6 @@ sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.g
 echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
 sudo apt-get update
 sudo apt-get install k6
-
 ```
 
 #### golangci-lint (Code Linting)
@@ -124,10 +123,7 @@ cd arena-backend-challenge
 # 2. Download dependencies
 go mod download
 
-# 3. Generate Swagger documentation
-make swagger
-
-# 4. Run the server
+# 3. Run the server
 make run
 
 # Or build and run the binary
@@ -273,7 +269,7 @@ curl "http://localhost:8080/health"
 
 ## 🏗️ Architecture
 
-The project follows **Clean Architecture** principles with clear separation of concerns:
+The project follows a **layered architecture** with clear separation of concerns:
 
 ```
 arena-backend-challenge/
@@ -363,15 +359,15 @@ arena-backend-challenge/
 
 **Trade-offs:**
 - ✅ **Pros:**
-    - Ultra-fast lookups (< 1ms)
-    - Simple deployment (no database needed)
-    - High throughput (1,800+ req/s)
-    - No database maintenance
+  - Ultra-fast lookups (< 1ms)
+  - Simple deployment (no database needed)
+  - High throughput (1,800+ req/s)
+  - No database maintenance
 
 - ❌ **Cons:**
-    - Requires server restart to update data
-    - Memory usage: ~400MB per instance
-    - Not suitable if dataset updates frequently
+  - Requires server restart to update data
+  - Memory usage: ~400MB per instance
+  - Not suitable if dataset updates frequently
 
 **Alternative considered:** PostgreSQL with indexed ranges
 - Would add ~10-50ms latency per query
@@ -388,16 +384,252 @@ arena-backend-challenge/
 
 **Trade-offs:**
 - ✅ **Pros:**
-    - Zero dependencies (except Swagger)
-    - Lightweight and fast
-    - Well-documented
+  - Zero dependencies (except Swagger)
+  - Lightweight and fast
+  - Well-documented
 
 - ❌ **Cons:**
-    - More verbose routing
-    - No built-in middleware chain
-    - Manual request parsing
+  - More verbose routing
+  - No built-in middleware chain
+  - Manual request parsing
 
 **Alternative considered:** Gin/Echo frameworks
 - Would provide cleaner routing syntax
 - Built-in middleware and validation
 - Not used to respect challenge constraints
+
+### 3. **Layered Architecture (Not Full Clean Architecture/DDD)**
+
+**Why:**
+- Project is simple and doesn't require complex domain logic
+- Pragmatic approach: YAGNI (You Aren't Gonna Need It)
+- Clear separation of concerns without over-engineering
+
+**What I used:**
+- **Handler → Service → Repository** pattern
+- Domain entities without complex business rules
+- Dependency injection for testability
+- Interface-based repository for mocking
+
+**What I didn't use (and why):**
+- **Use Cases layer:** Business logic is simple enough for service layer
+- **Domain events:** No complex state transitions
+- **Value objects:** IP and Location are simple structs
+- **Aggregates:** No complex entity relationships
+
+**Trade-offs:**
+- ✅ **Pros:**
+  - Simpler codebase, easier to understand
+  - Faster development for this scope
+  - Still testable and maintainable
+  - Easy to refactor to Clean Arch if needed
+
+- ❌ **Cons:**
+  - Less guidance for complex business rules
+  - Domain logic could leak into service layer
+  - Not ideal for large, complex domains
+
+**When to use Clean Architecture:**
+- Complex business rules and workflows
+- Multiple bounded contexts
+- Large team with many developers
+- Long-term project evolution expected
+
+**Why layered architecture is enough here:**
+- Single, simple use case (IP lookup)
+- No complex domain logic
+- Small codebase (~1000 LOC)
+- Performance is more important than domain modeling
+
+### 4. **CSV Loading on Startup**
+
+**Why:**
+- Static dataset doesn't change at runtime
+- One-time cost on server start (~2-3 seconds)
+- All data available in memory for fast lookups
+
+**Alternative considered:** Lazy loading
+- Would delay first requests
+- No benefit for static data
+- Current approach preferred
+
+### 5. **Docker Multi-Stage Build**
+
+**Why:**
+- Production image is only ~25MB
+- Build tools not included in runtime
+- Faster deployments and lower memory usage
+
+**Build stages:**
+1. **Builder stage:** Go 1.24 + git + swag CLI (~400MB)
+2. **Runtime stage:** Alpine + binary + CSV (~25MB)
+
+## 📊 Performance Characteristics
+
+### Lookup Performance
+- **Average latency:** 238µs (0.238ms)
+- **P95 latency:** 370µs (0.370ms)
+- **P99 latency:** < 1ms
+- **Throughput:** 1,833 requests/second
+- **Concurrency:** Tested up to 1,000 simultaneous users
+
+### Memory Usage
+- **CSV data loaded:** ~400MB
+- **Total application:** ~450MB
+- **Docker container:** ~25MB image + 450MB runtime
+
+### Binary Search Complexity
+- **Time complexity:** O(log n) where n = 2,979,950
+- **Worst case lookups:** ~22 comparisons
+- **Average lookups:** ~18 comparisons
+
+### Startup Time
+- **CSV loading:** 2-3 seconds
+- **Server ready:** < 5 seconds total
+
+## 🐳 Docker
+
+### Building the Image
+```bash
+make docker-build
+```
+
+This creates a multi-stage Docker image:
+- **Stage 1 (builder):** Compiles the Go binary with Swagger docs
+- **Stage 2 (runtime):** Lightweight Alpine Linux with binary and CSV
+
+**Final image size:** ~25MB
+
+### Running with Docker Compose
+```bash
+# Start
+make docker-run
+
+# Stop
+make docker-stop
+
+# Clean up (remove images and containers)
+make docker-clean
+```
+
+### Docker Compose Configuration
+```yaml
+version: '3.8'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - HTTP_SERVER_ADDRESS=0.0.0.0:8080
+      - CSV_FILE_PATH=data/IP2LOCATION-LITE-DB11.CSV
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+```
+
+## 🔧 Makefile Commands
+
+### Development
+```bash
+make build              # Build the binary
+make run                # Run the application
+make test               # Run all tests with coverage
+make swagger            # Generate Swagger documentation
+make lint               # Run golangci-lint
+make lint-fix           # Run linter with auto-fix
+make clean              # Clean build artifacts
+```
+
+### Testing
+```bash
+make test               # Run all tests
+make test-performance   # Run K6 load tests
+```
+
+### Docker
+```bash
+make docker-build       # Build Docker image
+make docker-run         # Start with docker-compose
+make docker-stop        # Stop containers
+make docker-clean       # Remove all Docker artifacts
+```
+
+## 🔐 Configuration
+
+Configuration is managed through environment variables, loaded from `.env` file:
+
+```bash
+# .env
+HTTP_SERVER_ADDRESS=0.0.0.0:8080
+CSV_FILE_PATH=data/IP2LOCATION-LITE-DB11.CSV
+```
+
+**Environment Variables:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `HTTP_SERVER_ADDRESS` | `0.0.0.0:8080` | Server bind address |
+| `CSV_FILE_PATH` | `data/IP2LOCATION-LITE-DB11.CSV` | Path to IP location dataset |
+
+## 🚦 CI/CD
+
+The project includes GitHub Actions workflow (`.github/workflows/ci.yml`):
+
+### Pipeline Stages
+1. **Lint** - Code quality checks with golangci-lint
+2. **Test** - Run all unit tests with race detection
+3. **Build** - Compile the application
+
+### Triggers
+- Push to `main` or `master` branch
+- Pull requests to `main` or `master` branch
+
+## 🤝 Challenge Requirements
+
+| Requirement | Status | Implementation |
+|------------|--------|----------------|
+| REST API with `/ip/location` endpoint | ✅ | Implemented with standard library |
+| IP to ID conversion | ✅ | `pkg/iputil/converter.go` |
+| Binary range search | ✅ | `internal/repository/memory.go` |
+| Response time < 100ms | ✅ | **Average: 0.238ms (417x faster)** |
+| Handle 100+ concurrent users | ✅ | **Tested: 1,000 concurrent users** |
+| Unit tests | ✅ | 85%+ test coverage |
+| No third-party libs (except REST) | ✅ | Only Swagger for docs |
+| Layered architecture | ✅ | Handler → Service → Repository |
+| K6 load testing | ✅ | Included in repository |
+
+## 📈 Possible Improvements
+
+1. **Caching Layer**
+  - Redis/Memcached for frequently queried IPs
+  - Would reduce repeated lookups
+  - Trade-off: Added complexity and infrastructure
+
+2. **Rate Limiting**
+  - Prevent abuse
+  - Token bucket or sliding window
+  - Trade-off: Added middleware
+
+3. **Metrics & Monitoring**
+  - Prometheus metrics endpoint
+  - Request latency histograms
+  - Error rate tracking
+  - Trade-off: Additional dependencies
+
+4. **Database Option**
+  - PostgreSQL with GiST index on IP ranges
+  - Better for frequently updated datasets
+  - Trade-off: Higher latency, more infrastructure
+
+## 👨‍💻 Author
+
+**Guilherme Moura** - *Software Engineer*
+- GitHub: [@moura95](https://github.com/moura95)
+- LinkedIn: [Guilherme Moura](https://linkedin.com/in/guilherme-moura95)
+- Email: junior.moura19@hotmail.com

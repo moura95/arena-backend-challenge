@@ -221,7 +221,6 @@ GET /ip/location?ip={ipv4_address}
 {
   "country": "United States",
   "countryCode": "US",
-  "region": "California",
   "city": "Mountain View"
 }
 ```

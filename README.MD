@@ -1,4 +1,4 @@
-# IP Location API
+o# IP Location API
 
 **High-performance REST API for IP geolocation** - Lightning-fast IP address lookup service using binary search over 2.9M+ location records.
 
@@ -55,6 +55,20 @@ brew install go
 # Ubuntu/Debian
 sudo apt install golang-1.24
 ```
+
+### 📥 IP2Location Dataset
+
+The project includes a **sample CSV file** (`data/sample.csv`) with 20 IP ranges for testing.
+
+**For full dataset with 2.9M+ records:**
+
+1Extract and place `IP2LOCATION-LITE-DB11.CSV` in the `data/` directory
+2Update `.env`:
+```bash
+   CSV_FILE_PATH=data/IP2LOCATION-LITE-DB11.CSV
+```
+
+**Note:** The full dataset (330MB) is not included in the repository. See `data/README.md` for details.
 
 #### Docker
 ```bash
@@ -607,25 +621,25 @@ The project includes GitHub Actions workflow (`.github/workflows/ci.yml`):
 ## 📈 Possible Improvements
 
 1. **Caching Layer**
-  - Redis/Memcached for frequently queried IPs
-  - Would reduce repeated lookups
-  - Trade-off: Added complexity and infrastructure
+- Redis/Memcached for frequently queried IPs
+- Would reduce repeated lookups
+- Trade-off: Added complexity and infrastructure
 
 2. **Rate Limiting**
-  - Prevent abuse
-  - Token bucket or sliding window
-  - Trade-off: Added middleware
+- Prevent abuse
+- Token bucket or sliding window
+- Trade-off: Added middleware
 
 3. **Metrics & Monitoring**
-  - Prometheus metrics endpoint
-  - Request latency histograms
-  - Error rate tracking
-  - Trade-off: Additional dependencies
+- Prometheus metrics endpoint
+- Request latency histograms
+- Error rate tracking
+- Trade-off: Additional dependencies
 
 4. **Database Option**
-  - PostgreSQL with GiST index on IP ranges
-  - Better for frequently updated datasets
-  - Trade-off: Higher latency, more infrastructure
+- PostgreSQL with GiST index on IP ranges
+- Better for frequently updated datasets
+- Trade-off: Higher latency, more infrastructure
 
 ## 👨‍💻 Author
 

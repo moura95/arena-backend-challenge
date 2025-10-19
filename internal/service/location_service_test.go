@@ -26,7 +26,6 @@ func TestLocationService_GetLocationByIP(t *testing.T) {
 					UpperIPID:   134744072,
 					Country:     "United States",
 					CountryCode: "US",
-					Region:      "California",
 					City:        "Mountain View",
 				}, nil
 			},
@@ -35,7 +34,6 @@ func TestLocationService_GetLocationByIP(t *testing.T) {
 				UpperIPID:   134744072,
 				Country:     "United States",
 				CountryCode: "US",
-				Region:      "California",
 				City:        "Mountain View",
 			},
 			wantErr:       false,
@@ -78,14 +76,12 @@ func TestLocationService_GetLocationByIP(t *testing.T) {
 				return &domain.Location{
 					Country:     "United States",
 					CountryCode: "US",
-					Region:      "California",
 					City:        "Mountain View",
 				}, nil
 			},
 			wantLocation: &domain.Location{
 				Country:     "United States",
 				CountryCode: "US",
-				Region:      "California",
 				City:        "Mountain View",
 			},
 			wantErr:       false,
@@ -132,7 +128,6 @@ func TestLocationService_GetLocationByIP(t *testing.T) {
 			if !tt.wantErr && got != nil && tt.wantLocation != nil {
 				if got.Country != tt.wantLocation.Country ||
 					got.CountryCode != tt.wantLocation.CountryCode ||
-					got.Region != tt.wantLocation.Region ||
 					got.City != tt.wantLocation.City {
 					t.Errorf("GetLocationByIP() = %+v, want %+v", got, tt.wantLocation)
 				}
@@ -147,7 +142,6 @@ func BenchmarkLocationService_GetLocationByIP(b *testing.B) {
 			return &domain.Location{
 				Country:     "United States",
 				CountryCode: "US",
-				Region:      "California",
 				City:        "Mountain View",
 			}, nil
 		},

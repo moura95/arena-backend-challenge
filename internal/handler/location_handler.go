@@ -53,7 +53,6 @@ func (h *LocationHandler) GetLocation(w http.ResponseWriter, r *http.Request) {
 	response := v1.LocationResponse{
 		Country:     location.Country,
 		CountryCode: location.CountryCode,
-		Region:      location.Region,
 		City:        location.City,
 	}
 

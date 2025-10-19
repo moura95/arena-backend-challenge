@@ -30,7 +30,6 @@ func TestLocationHandler_GetLocation(t *testing.T) {
 				return &domain.Location{
 					Country:     "United States",
 					CountryCode: "US",
-					Region:      "California",
 					City:        "Mountain View",
 				}, nil
 			},
@@ -72,7 +71,6 @@ func TestLocationHandler_GetLocation(t *testing.T) {
 				return &domain.Location{
 					Country:     "United States",
 					CountryCode: "US",
-					Region:      "California",
 					City:        "Mountain View",
 				}, nil
 			},
@@ -202,7 +200,6 @@ func BenchmarkLocationHandler_GetLocation(b *testing.B) {
 			return &domain.Location{
 				Country:     "United States",
 				CountryCode: "US",
-				Region:      "California",
 				City:        "Mountain View",
 			}, nil
 		},

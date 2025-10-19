@@ -7,7 +7,6 @@ type Location struct {
 	UpperIPID   uint32
 	Country     string
 	CountryCode string
-	Region      string
 	City        string
 }
 
